@@ -1,8 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
-// import seedData from '../data/test-data';
 import connection from './db/connection';
-// import seed from './db/seeds/seed';
 
 jest.mock('./db/connection', () => {
   return {

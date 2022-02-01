@@ -65,11 +65,12 @@ describe('GET: /api/topics', () => {
 });
 
 describe('GET: /api/articles/:article_id', () => {
+  // happy path
   it('200 - returns single article', async () => {
     const ARTICLE_ID = 1;
 
     prismaMock.article.findUnique
-      // .calledWith({ where: { article_id: ARTICLE_ID } })
+      // .calledWith({ where: { article_id: ARTICLE_ID } }) // not working?? using toBeCalledWith instead
       .mockResolvedValue({
         ...testData.articleData[0],
         created_at: new Date(testData.articleData[0].created_at),
@@ -86,7 +87,7 @@ describe('GET: /api/articles/:article_id', () => {
     } = res;
 
     expect(prismaMock.article.findUnique).toBeCalledWith({
-      where: { article_id: 1 },
+      where: { article_id: ARTICLE_ID },
     });
 
     expect(article).toEqual(
@@ -101,6 +102,7 @@ describe('GET: /api/articles/:article_id', () => {
       })
     );
   });
+  // errors
   it('404 - returns message when article not found', async () => {
     const ARTICLE_ID = 9999;
 
@@ -110,7 +112,106 @@ describe('GET: /api/articles/:article_id', () => {
       .get(`/api/articles/${ARTICLE_ID}`)
       .expect(404);
 
+    expect(prismaMock.article.findUnique).toBeCalledWith({
+      where: { article_id: ARTICLE_ID },
+    });
+
     expect(res.body.message).toBe('article not found');
     expect(res.body.status).toBe(404);
+  });
+  it('400 - returns message when non-int article_id passed', async () => {
+    const ARTICLE_ID = 'not an id';
+
+    prismaMock.article.findUnique.mockResolvedValue(null);
+
+    const res: ErrorResponse = await request(app)
+      .get(`/api/articles/${ARTICLE_ID}`)
+      .expect(400);
+
+    expect(res.body.message).toBe('incorrect format');
+    expect(res.body.status).toBe(400);
+  });
+});
+
+describe('PATCH: /api/articles/:article_id', () => {
+  // happy path
+  it('200 - returns updated article with updated votes', async () => {
+    const ARTICLE_ID = 1;
+    const payload = { inc_votes: 1 };
+
+    prismaMock.article.update.mockResolvedValue({
+      ...testData.articleData[0],
+      created_at: new Date(testData.articleData[0].created_at),
+      article_id: ARTICLE_ID,
+      updated_at: new Date(),
+      votes: testData.articleData[0].votes + 1,
+    });
+
+    const res: Response<Article> = await request(app)
+      .patch(`/api/articles/${ARTICLE_ID}`)
+      .send(payload)
+      .expect(200);
+
+    expect(prismaMock.article.update).toBeCalledWith({
+      where: { article_id: ARTICLE_ID },
+      data: { votes: payload.inc_votes },
+    });
+
+    expect(res.body.article).toEqual(
+      expect.objectContaining({
+        ...testData.articleData[0],
+        article_id: ARTICLE_ID,
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+        votes: 101,
+      })
+    );
+  });
+
+  it('404 - returns message when article_id not found', async () => {
+    const ARTICLE_ID = 9999;
+    const payload = { inc_votes: 1 };
+
+    prismaMock.article.findUnique.mockResolvedValue(null);
+
+    const res: ErrorResponse = await request(app)
+      .patch(`/api/articles/${ARTICLE_ID}`)
+      .send(payload)
+      .expect(404);
+
+    expect(prismaMock.article.update).toBeCalledWith({
+      where: { article_id: ARTICLE_ID },
+      data: { votes: payload.inc_votes },
+    });
+
+    expect(res.body.message).toBe('article not found');
+    expect(res.body.status).toBe(404);
+  });
+
+  it('400 - returns message when non-int article_id passed', async () => {
+    const ARTICLE_ID = 'not an id';
+    const payload = { inc_votes: 1 };
+
+    prismaMock.article.findUnique.mockResolvedValue(null);
+
+    const res: ErrorResponse = await request(app)
+      .patch(`/api/articles/${ARTICLE_ID}`)
+      .send(payload)
+      .expect(400);
+
+    expect(res.body.message).toBe('incorrect format');
+    expect(res.body.status).toBe(400);
+  });
+  it('400 - returns message when invalid payload sent', async () => {
+    const ARTICLE_ID = 1;
+    const payload = { inc_votes: 'not a number' };
+
+    const res: ErrorResponse = await request(app)
+      .patch(`/api/articles/${ARTICLE_ID}`)
+      .send(payload)
+      .expect(400);
+
+    expect(res.body.message).toBe('incorrect format');
+    expect(res.body.status).toBe(400);
   });
 });
