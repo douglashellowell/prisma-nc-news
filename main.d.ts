@@ -1,3 +1,5 @@
+// import { Article, Comment, Topic, User } from '@prisma/client';
+
 export type Article = {
   title: string;
   topic: string;
@@ -28,10 +30,8 @@ export type User = {
 
 export type SeedData = {
   articleData: Article[];
-
   commentData: Comment[];
   topicData: Topic[];
-
   userData: User[];
 };
 

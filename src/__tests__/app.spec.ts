@@ -1,6 +1,6 @@
 import app from '../app';
 import request from 'supertest';
-import { Article, Topic } from '@prisma/client';
+import { Article, Topic, User } from '@prisma/client';
 import dropData from '../db/seeds/drop-data';
 import seed from '../db/seeds/seed';
 import testData from '../../data/test-data/index';
@@ -213,5 +213,35 @@ describe('PATCH: /api/articles/:article_id', () => {
 
     expect(res.body.message).toBe('incorrect format');
     expect(res.body.status).toBe(400);
+  });
+});
+
+describe('GET /api/users', () => {
+  it('200 - returns a list of all users', async () => {
+    prismaMock.user.findMany.mockResolvedValue([...testData.userData]);
+
+    const res: Response<User[]> = await request(app)
+      .get('/api/users')
+      .expect(200);
+
+    expect(res.body.users.length === testData.userData.length).toBe(true);
+
+    res.body.users.forEach((user) => {
+      expect(user).toEqual(
+        expect.objectContaining({
+          username: expect.any(String),
+          name: expect.any(String),
+          avatar_url: expect.any(String),
+        })
+      );
+    });
+  });
+});
+
+describe('GET /api/users/:username', () => {
+  it('200 - returns user data with associated comments and articles', async () => {
+    const user = 'jessjelly';
+
+    // ?
   });
 });
