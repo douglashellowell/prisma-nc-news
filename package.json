@@ -1,0 +1,47 @@
+{
+  "name": "be-nc-news",
+  "version": "1.0.0",
+  "description": "bc-nc-news",
+  "main": "index.js",
+  "scripts": {
+    "setup-dbs": "psql -f src/db/setup.sql",
+    "migrate": "prisma migrate dev",
+    "tsc": "tsc --watch",
+    "prisma-regen": "prisma generate",
+    "seed": "prisma migrate reset",
+    "test": "jest -i"
+  },
+  "prisma": {
+    "seed": "ts-node src/db/seeds/run-seed.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/northcoders/be-nc-news.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/northcoders/be-nc-news/issues"
+  },
+  "homepage": "https://github.com/northcoders/be-nc-news#readme",
+  "dependencies": {
+    "@prisma/client": "^3.8.1",
+    "@types/expect": "^24.3.0",
+    "@types/express": "^4.17.13",
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "@types/node": "^17.0.13",
+    "@types/supertest": "^2.0.11",
+    "jest": "^27.4.7",
+    "jest-mock-extended": "^2.0.4",
+    "nodemon": "^2.0.15",
+    "prisma": "^3.8.1",
+    "supertest": "^6.2.2",
+    "ts-jest": "^27.1.3",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
+  }
+}
